@@ -1,51 +1,57 @@
-YouTube Stream Scraper (In Progress)
-A high-performance TypeScript and Playwright engine designed to stream YouTube metadata using memory-efficient Async Generators.
+# 🎥 YouTube Stream Scraper (In Progress)
 
-🎯 Engineering Goals
-Memory Efficiency: Use AsyncGenerators to yield data in real-time, avoiding high memory overhead for large channels.
+A high-performance **TypeScript + Playwright** scraping engine that streams YouTube metadata in real-time using **memory-efficient Async Generators**.
 
-Resilient Extraction: Implement adaptive scrolling to handle YouTube's dynamic infinite-loading DOM.
+Designed for scalability, low memory usage, and reliable extraction from YouTube’s dynamic UI.
 
-Type Safety: Ensure strict data integrity across Videos, Shorts, and Podcasts using TypeScript.
+---
 
-Data Normalization: Automatically convert subscriber/view strings (e.g., "1.2M") into standard integers.
+## 🚀 Features
 
-🚀 Key Features
-Comprehensive Scoping: Supports basic_info, video, shorts, and podcast categories.
+### ⚡ Memory Efficient
+Uses **Async Generators** to stream results progressively instead of storing everything in memory.
 
-Headless Performance: Optimized for fast, background execution via Playwright.
+### 🔄 Resilient Extraction
+Implements adaptive scrolling to handle YouTube’s infinite loading and dynamic DOM updates.
 
-Developer Friendly: Built with modern ECMAScript standards (ES2020) and NodeNext module resolution.
+### 🧠 Type Safe
+Built with **TypeScript** to enforce strict typing across:
+- Videos
+- Shorts
+- Podcasts
 
-🔧 Setup & Installation
-Clone & Install:
+### 📊 Data Normalization
+Automatically converts values like:
+- `1.2K → 1200`
+- `3.4M → 3400000`
 
-Bash
+### 🖥 Headless Performance
+Optimized for fast, background execution using **Playwright (Chromium)**.
+
+---
+
+## 🧩 Supported Categories
+
+- `basic_info`
+- `video`
+- `shorts`
+- `podcast`
+
+---
+
+## 🛠 Tech Stack
+
+- TypeScript
+- Node.js
+- Playwright
+- ES2020 modules
+
+---
+
+## 🔧 Installation
+
+### 1️⃣ Clone repository
+
+```bash
 git clone https://github.com/yshail/youtube-stream-scraper.git
 cd youtube-stream-scraper
-npm install
-Install Browsers:
-
-Bash
-npx playwright install chromium
-💻 Usage
-Consume data in real-time as it is scraped:
-
-TypeScript
-import { extract } from "./yt-yield";
-
-async function run() {
-  const scraper = extract("https://www.youtube.com/@OpenAI", "video");
-
-  for await (const video of scraper) {
-    console.log(`Found: ${video.title} | Views: ${video.views}`);
-  }
-}
-🏗️ Roadmap
-[ ] Implement proxy rotation to bypass rate limits.
-
-[ ] Add extraction for upload dates and video duration.
-
-[ ] Support export to JSON, CSV, and MongoDB.
-
-[ ] Create a CLI for quick-start scraping tasks.
