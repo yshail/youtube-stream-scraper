@@ -1,5 +1,4 @@
-# Use the official Playwright image which includes Chromium and its system dependencies natively
-FROM mcr.microsoft.com/playwright:v1.50.0-jammy
+FROM mcr.microsoft.com/playwright:v1.58.1-jammy
 
 # Set the working directory directly in the container
 WORKDIR /usr/src/app
