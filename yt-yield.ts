@@ -14,7 +14,7 @@ type BasicInfo = {
   totalVideos: number;
 };
 
-type Category = "basic_info" | "video" | "shorts" | "podcast";
+export type Category = "basic_info" | "video" | "shorts" | "podcast";
 
 ///////////////---- Utility Functions
 
@@ -28,26 +28,26 @@ function convertToNumber(subs: string): number {
 
 /////////----Extract Functions----Overload Signature
 
-function extract(
+export function extract(
   channelName: string,
   category: "basic_info",
 ): AsyncGenerator<BasicInfo>;
-function extract(
+export function extract(
   channelName: string,
   category: "video",
 ): AsyncGenerator<VideoItem>;
-function extract(
+export function extract(
   channelName: string,
   category: "shorts",
 ): AsyncGenerator<VideoItem>;
-function extract(
+export function extract(
   channelName: string,
   category: "podcast",
 ): AsyncGenerator<VideoItem>;
 
 ///////////----------------------Generator Function----------Implementation----------------------------------//////////////////////////////////
 
-async function* extract(
+export async function* extract(
   channelURL: string,
   category: Category,
 ): AsyncGenerator<VideoItem | BasicInfo> {
@@ -75,8 +75,9 @@ async function* extract(
       subscribers,
       totalVideos,
     };
+    yield channelInfo;
     await browser.close();
-    return channelInfo;
+    return;
   }
 
   ///////----Video----///////---------------------
@@ -94,23 +95,29 @@ async function* extract(
           });
           //   await page.waitForTimeout(300);
         }
+        const videoItem = page
+          .locator("ytd-rich-item-renderer")
+          .nth(videoNumber);
+        const itemExists = await videoItem
+          .waitFor({ state: "attached", timeout: 4000 })
+          .then(() => true)
+          .catch(() => false);
+
+        if (!itemExists) {
+          console.log("No new video entry found after 4s. Ending video fetch.");
+          break;
+        }
+
         const title: string =
-          (await page
-            .locator("ytd-rich-item-renderer h3")
-            .nth(videoNumber)
-            .textContent()) || "Video Title not Found!";
+          (await videoItem.locator("h3").textContent()) ||
+          "Video Title not Found!";
         let tempURL =
-          (await page
-            .locator("ytd-rich-item-renderer h3")
-            .nth(videoNumber)
-            .locator("a")
-            .getAttribute("href")) || "URL not Found!";
+          (await videoItem.locator("h3").locator("a").getAttribute("href")) ||
+          "URL not Found!";
         let url = `https://www.youtube.com${tempURL}`;
         let viewer: string =
-          (await page
-            .locator("ytd-rich-item-renderer ytd-video-meta-block")
-            .nth(videoNumber)
-            .textContent()) || "URL not Found!";
+          (await videoItem.locator("ytd-video-meta-block").textContent()) ||
+          "URL not Found!";
         const views: number = convertToNumber(viewer.trim().split(/\s+/)[2]);
         const video: VideoItem = {
           title,
@@ -139,7 +146,20 @@ async function* extract(
         });
         //   await page.waitForTimeout(300);
 
-        const details = await shorts.nth(i).evaluate((el: any) => ({
+        const currentShort = shorts.nth(i);
+        const shortExists = await currentShort
+          .waitFor({ state: "attached", timeout: 4000 })
+          .then(() => true)
+          .catch(() => false);
+
+        if (!shortExists) {
+          console.log(
+            "No new shorts entry found after 4s. Ending shorts fetch.",
+          );
+          break;
+        }
+
+        const details = await currentShort.evaluate((el: any) => ({
           title: el.data?.overlayMetadata?.primaryText?.content,
           views: el.data?.overlayMetadata?.secondaryText?.content,
           url: el.data?.onTap?.innertubeCommand?.commandMetadata
@@ -175,11 +195,24 @@ async function* extract(
         });
         //   await page.waitForTimeout(300);
 
-        const details = await podcast.nth(i).evaluate((el: any) => ({
+        const currentPodcast = podcast.nth(i);
+        const podcastExists = await currentPodcast
+          .waitFor({ state: "attached", timeout: 4000 })
+          .then(() => true)
+          .catch(() => false);
+
+        if (!podcastExists) {
+          console.log(
+            "No new podcast entry found after 4s. Ending podcast fetch.",
+          );
+          break;
+        }
+
+        const details = await currentPodcast.evaluate((el: any) => ({
           title: el.innerText.split("\n")[0],
         }));
         let url =
-          (await podcast.nth(i).locator("a").first().getAttribute("href")) ??
+          (await currentPodcast.locator("a").first().getAttribute("href")) ??
           "";
         url = `https://www.youtube.com${url}`;
         const title: string = details.title;
@@ -198,17 +231,7 @@ async function* extract(
   }
 }
 
-(async function () {
-  const data = extract("https://www.youtube.com/@OpenAI", "basic_info");
-
-  let i = 1;
-  while (i <= 200) {
-    const iterator = await data.next();
-    console.log(iterator.value);
-    if (iterator.done) break;
-    i++;
-  }
-})();
+// Test code replaced for module export
 
 ////////////---------------------Old--------Code
 //////////////////////

@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: youtube-stream-scraper
+    env: docker # Tells Render to natively build and launch using the Dockerfile
+    # By default Render exposes the right ports inside Docker containers but we state it explicitly
+    port: 3000
+    plan: free # Can upgrade this to starter depending on how heavy your queries are
+    autoDeploy: true
